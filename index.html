@@ -68,7 +68,7 @@
                     for (i = 1; i<=range.value; i++) {
                         array.push(`${prefix.value}_${i}`);
                     }
-                let script = `startdemos ${array.join(';')};demos`
+                let script = `startdemos ${array.join(' ')};demos`
             form[0].reset();
             reply.value = script;
             }
