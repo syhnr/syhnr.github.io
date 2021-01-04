@@ -17,7 +17,6 @@
             display: flex;
             width:100%;
             padding: 0.2rem 0;
-
         }
         
         form input, button{
@@ -28,29 +27,28 @@
             border-radius: 5px;
         }
         
-        .inputs input{
-            margin-bottom: 1rem;
-            outline: 1px solid rgb(0 0 0 / 5%);
+        .inputs{
+            outline: none;
+            border: none;
+            transition: background 0.1s linear;
         }
         
         .container{
+            user-select: none;
+            margin-bottom: 1rem;
             background: transparent;
             padding: 2rem;
             border-radius: 5px;
             box-shadow: 0 0 20px 2px rgb(0 0 0 / 20%);
             border: 1px solid rgb(0 0 0 / 15%);
-            min-width: 30%;
+            min-width: 20%;
         }
 
-        .button{
-            cursor:pointer;
+
+        .error{
+            background: rgb(255, 0, 0, 20%)
         }
 
-        #reply{
-            width: 50%;
-            border: 0;
-            outline: none;
-        }
 
         #error{
             display: initial;
@@ -58,13 +56,33 @@
         }
     </style>
     <script>
-        function validate() {
-            const prefix = document.getElementById('prefix'), range = document.getElementById('range'), reply = document.getElementById('reply'), error = document.getElementById('error'), form = document.getElementsByName('frm');
-            if(!prefix.value || !range.value) {
-                error.innerText = "Inputs should contain something"
+        function filter(event) {
+            if (event.type === 'paste') {
+                key = event.clipboardData.getData('text/plain');
             } else {
+                var key = event.keyCode || event.which;
+                key = String.fromCharCode(key);
+            }
+            let regex = /[0-9]|\-/;
+            if( !regex.test(key) ) {
+                event.returnValue = false;
+                if(event.preventDefault) event.preventDefault();
+            }
+        }
+
+        function validate() {
+            var prefix = document.getElementById('prefix'), range = document.getElementById('range'), reply = document.getElementById('reply'), error = document.getElementById('error'), form = document.getElementsByName('frm');
+            if(!prefix.value || !range.value) {
+                range.classList.add('error');
+                prefix.classList.add('error');
+                return;
+            } else {
+                prefix.classList.remove('error')
+                range.classList.remove("error")
+                var split = range.value.split('-').reverse();
+                if(!split[1]) split[1] = "1"; else if(split[0]<split[1]) split = range.value.split('-');
                 let array = [];
-                    for (i = 1; i<=range.value; i++) {
+                    for (let i = split[1]; i<=split[0]; i++) {
                         array.push(`${prefix.value}_${i}`);
                     }
                 let script = `startdemos ${array.join(' ')};demos`
@@ -80,20 +98,20 @@
     </script>
 </head>
 <body>
-        <div class='container'>
-            <form name='frm'>
-                <div class="inputs">
+        <div class="container">
+            <form name="frm">
+                <div>
                     <label> Demo prefix (required)</label>
-                    <input id="prefix" type="text" placeholder="Example: demos">
+                    <input id="prefix" type="text" autocomplete='off' placeholder="Example: demos" class="inputs">
                     <label> Number of demos (required)</label>
-                    <input id="range" type="number" placeholder="Example: 21">
+                    <input id="range" type="text" autocomplete='off' onkeypress="filter(event)" placeholder="Example: 102 or 23-102" class="inputs">
                 </div>
-                <input type=button onclick="validate()" class="button" value="Submit">
+                <input type="button" onclick="validate()" class="button" value="Submit">
                 <label id="error"></label>
             </form>
             <br>
             <div class="reply">
-                <input id="reply" readonly>
+                <input class="inputs" id="reply" readonly="">
                 <button class="button" onclick="select()">Copy</button>
             </div>
         </div>
